@@ -15,9 +15,12 @@ public class TEST {
 	Connection brs_conn;
 	Connection sys_conn;
 	
+	// jdbc 드라이버 정보
 	private final String DRIVER_NAME = "com.tmax.tibero.jdbc.TbDriver";
-	private final String TIBERO_JDBC_BRS_URL = "jdbc:tibero:thin:@10.240.8.101:8629:BRS";
-	private final String TIBERO_JDBC_SYS_URL = "jdbc:tibero:thin:@10.240.8.110:8629:BRS";
+	
+	// db 접속 유저
+	private final String TIBERO_JDBC_BRS_URL = "jdbc:tibero:thin:@x.x.x.x:x:x";
+	private final String TIBERO_JDBC_SYS_URL = "jdbc:tibero:thin:@x.x.x.x:x:x";
 	
 	private List<String> tableList = new ArrayList<>();
 	
@@ -41,15 +44,14 @@ public class TEST {
 		}
 		
 		try {
-			brs_conn = DriverManager.getConnection(TIBERO_JDBC_BRS_URL, "brs", "brs2098");
+			brs_conn = DriverManager.getConnection(TIBERO_JDBC_BRS_URL, "x", "x");
 			
+			// 테이블 목록 조회
 			String select = "SELECT * FROM ALL_TABLES WHERE OWNER = ?";
 			
 			PreparedStatement pstmt = 
 		   		 brs_conn.prepareStatement(select);
-			
 			pstmt.setString(1, "AIRBRS");
-			
 			ResultSet rs = pstmt.executeQuery();
 
 			while(rs.next()) {
@@ -72,7 +74,7 @@ public class TEST {
 		}
 		
 		try {
-			sys_conn = DriverManager.getConnection(TIBERO_JDBC_SYS_URL, "SYS", "tibero");
+			sys_conn = DriverManager.getConnection(TIBERO_JDBC_SYS_URL, "x", "x");
 		} catch (SQLException e) {
 			System.out.println("connection failure!");
 			System.exit(-1);
@@ -83,10 +85,11 @@ public class TEST {
 	
 	private void executePreparedStatement() throws SQLException
 	{
+		// 테이블 목록 만큼 반복해서 데이터 마이그레이션 진행
 		for(String tableName : tableList) {
 			
-			String select = String.format("select * from AIRBRS.%s", tableName);
-//			String select = String.format("select * from AIRBRS.%s", "AIRCRAFT_INFO");
+			String select = String.format("select * from ", tableName);
+			
 			PreparedStatement pstmt = 
 		   		 brs_conn.prepareStatement(select);
 			
@@ -94,15 +97,16 @@ public class TEST {
 			ResultSetMetaData rsmd = rs.getMetaData();
 			
 			int nColumn = rsmd.getColumnCount();
-			String insert = String.format("INSERT INTO AIRBRS.%s VALUES(", tableName);
-//			String insert = String.format("INSERT INTO AIRBRS.%s VALUES(", "AIRCRAFT_INFO");
+			String insert = String.format("INSERT INTO %s VALUES(", tableName);
 			String values = "";
 			
 			int j = 0;
 			int k = 0;
 			
+			//현재 작업중인 테이블 명 출력
 			System.out.println("WORKING TABLE ::: " + tableName);
 			
+			// 테이블의 컬럼수 만큼 반복해서 insert 문장 생성 로직
 			while (rs.next()) {
 		   	 
 				j++;
@@ -161,11 +165,9 @@ public class TEST {
 				
 				insert += values;
 				PreparedStatement insert_pre = sys_conn.prepareStatement(insert);
-				insert = String.format("INSERT INTO AIRBRS.%s VALUES(", tableName);
-//				insert = String.format("INSERT INTO AIRBRS.%s VALUES(", "AIRCRAFT_INFO");
+				insert = String.format("INSERT INTO %s VALUES(", tableName);
 				values = "";
 				try {
-					
 					if(j % 10000 == 0) {
 						System.out.println("WORKING :::" + j);
 					}
@@ -192,14 +194,18 @@ public class TEST {
 	   	 brs_conn.close();
 	   	 System.out.println("brs_conn Connection close");
 	    }
-	    
-	    	
-	    
 	    if(sys_conn != null) {
 	   	 sys_conn.close();
 	   	 System.out.println("sys_conn Connection close");
 	    }
-	   	 
+	    if(pstmt != null) {
+		   pstmt.close();
+		   System.out.println("pstmt close");
+	    }
+	    if(insert_pre != null) {
+		   insert_pre.close();
+		   System.out.println("insert_pre close");
+	    }
 	}
 	
 }
