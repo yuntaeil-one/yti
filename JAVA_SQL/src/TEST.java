@@ -1,4 +1,5 @@
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -42,85 +43,18 @@ public class TEST {
 		try {
 			brs_conn = DriverManager.getConnection(TIBERO_JDBC_BRS_URL, "brs", "brs2098");
 			
-			String[] tableArray = {
-//		   		 "INBOUND_BAG_ADDITION_INFO",
-//		   		 "INBOUND_BAG_AIRLINE_DATA",
-//		   		 "INBOUND_BAG_EXCEPTION_DATA",
-//		   		 "INBOUND_BAG_HIST",
-//		   		 "INBOUND_BAG_PROCESS_INFO",
-//		   		 "INBOUND_BAG_UNIQUE_IDENTIFIER",
-//		   		 "INBOUND_BAG_UNLOAD_HIST",
-//		   		 "INBOUND_BPM_SEND",
-//		   		 "INBOUND_BPM_SEND_APPLY_HIST",
-//		   		 "INBOUND_FILE_MESSAGE_HIST",
-//		   		 "INBOUND_MANUAL_FLIGHT_HIST",
-//		   		 "INBOUND_MANUAL_FLIGHT_INFO",
-//		   		 "INBOUND_MESSAGE_APPLY_HIST",
-//		   		 "INBOUND_MESSAGE_FAIL_HIST",
-//		   		 "INBOUND_TRANSACTION_BAG_HIST",
-//		   		 "LOGBAG_HIST",
-//		   		 "LOGIN_HIST",
-//		   		 "MENU_AUTH",
-//		   		 "MENU_INFO",
-//		   		 "MENU_INFO_BAK",
-//		   		 "MESSAGE_CODE_INFO",
-//		   		 "OPENINGBAG_HIST",
-//		   		 "OUTBOUND_ALERT_HIST",
-//		   		 "OUTBOUND_BAG_ADDITION_INFO",
-//		   		 "OUTBOUND_BAG_AIRLINE_DATA",
-//		   		 "OUTBOUND_BAG_EXCEPTION_DATA",
-//		   		 "OUTBOUND_BAG_HIST",
-//		   		 "OUTBOUND_BAG_INFO",
-//		   		 "OUTBOUND_BAG_PROCESS_INFO",
-//		   		 "OUTBOUND_BAG_UNIQUE_IDENTIFIER",
-//		   		 "OUTBOUND_BAG_UNLOAD_HIST",
-//		   		 "OUTBOUND_BPM_SEND",
-//		   		 "OUTBOUND_BPM_SEND_APPLY_HIST",
-//		   		 "OUTBOUND_FLIGHT_SUMMARY",
-//		   		 "OUTBOUND_MANUAL_FLIGHT_HIST",
-//		   		 "OUTBOUND_MANUAL_FLIGHT_INFO",
-//		   		 "OUTBOUND_MESSAGE_HIST",
-//		   		 "OUTBOUND_MESSAGE_SEND_HIST",
-//		   		 "OUTBOUND_MQ_MESSAGE_HIST",
-//		   		 "OUTBOUND_MQ_MESSAGE_SEND_HIST",
-//		   		 "OUTBOUND_TRANSACTION_BAG_HIST",
-//		   		 "OUTBOUND_TRANSACTION_FAIL_HIST",
-//		   		 "OUTBOUND_TRANSACTION_HIST",
-//		   		 "SCN_PROGRAM_BOARD",
-//		   		 "SCN_PROGRAM_UPDATE_HIST",
-//		   		 "SECURITY_BAG_HIST",
-//		   		 "SMTP_INFO",
-//		   		 "STOP_BAG_HIST",
-//		   		 "SYS_BPM_LOG",
-//		   		 "SYS_MQ_FAIL_LOG",
-//		   		 "SYS_SYNCHRONIZER_LOG",
-//		   		 "SYS_ZZ_ELAPSED_LOG",
-					
-//		   		 "TRANSACTION_INFO",
-//		   		 "TRANSACTION_MESSAGE_INFO",
-//		   		 "TROUBLE_BAG_INFO",
-//		   		 "ULD_BAG_MAPPING_INFO",
-//		   		 "ULD_BARCODE_REPORT",
-//		   		 "ULD_INFO",
-//		   		 "USER_ALLOW_IP_INFO",
-//		   		 "USER_GUIDE_INFO",
-//		   		 "USER_INFO",
-//		   		 "WK_CL_R",
-//		   		 "WK_CP_R",
-//		   		 "WK_PG_R",
-//		   		 "WK_TC_P",
-//		   		 "WK_TC_R",
-//		   		 "WK_UC_R",
-//		   		 "WK_UI_R"
-		    };
-		    
-		    
-		    for(String table : tableArray) {
-		   	 tableList.add(table);
-		    }
+			String select = "SELECT * FROM ALL_TABLES WHERE OWNER = ?";
 			
-			System.out.println(tableList.toString());
+			PreparedStatement pstmt = 
+		   		 brs_conn.prepareStatement(select);
 			
+			pstmt.setString(1, "AIRBRS");
+			
+			ResultSet rs = pstmt.executeQuery();
+
+			while(rs.next()) {
+				tableList.add(rs.getString("TABLE_NAME"));
+			}
 		} catch (SQLException e) {
 			System.out.println("connection failure!");
 			System.exit(-1);
