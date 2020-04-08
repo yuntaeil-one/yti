@@ -1,3 +1,3 @@
 ### README.md
 
-- JDBC SQL INSERT TEST 입니다
+- 자료실
